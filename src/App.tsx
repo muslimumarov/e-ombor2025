@@ -1,12 +1,11 @@
 
-import Navbar from "./layouts/base/navbar/Navbar.tsx";
+import Router from "./route.tsx";
 
 const App: React.FC = () => {
 
     return (
-      <div className="min-h-screen">
-        <Navbar />
-        <h1>boshlandi</h1>
+      <div className="">
+          <Router/>
       </div>
     );
   }
