@@ -1,46 +1,59 @@
 import React from "react";
 import Logo from "../../../../public/images/Logo-Gold.png";
+import Logo2 from "../../../../public/images/Logo-Blue-Main.png";
 import gerb from "../../../../public/images/home-gerb.0379468a.svg";
 import flag from "../../../../public/images/download.png";
 import ThemeToggle from "../../../core/components/darkMode/ThemeToggle.tsx";
 import LanguageSelector from "../../../core/components/language/LanguageSelector.tsx";
-import {Button} from "flowbite-react";
+import {Button, useThemeMode} from "flowbite-react";
+import useMenuStore from "../../../store/useMenuStore.ts";
+import { ListIcon, MenuIcon } from "lucide-react";
+import Profile from "../../../components/profile/Profile.tsx";
 
 const Navbar: React.FC = () => {
+    const { mode } = useThemeMode(); // `theme` bu 'light' yoki 'dark'
+    const isDark = mode === "dark";
+    const { menuOpen, setMenuOpen } = useMenuStore();
 
     return (
-        <header className="fixed left-0 top-0 z-[9999] w-full bg-blue-950 shadow-md backdrop-blur">
-            <Button
-                color={"gray"}
-                size={"xs"}
-                className={"text-gray cursor-pointer"}
-                oc
-            >
+        <header className="fixed left-0 top-0 z-[9999] w-full bg-gray-50 shadow-md backdrop-blur dark:bg-dark-primary">
+            <div className=" flex items-center justify-between px-4 py-3">
+                {/* Sidebar Toggle Button */}
+                <div className="flex items-center gap-2">
+                    <Button
+                        color="gray"
+                        size="xs"
+                        className="mr-3 cursor-pointer text-gray-700"
+                        onClick={() => setMenuOpen(!menuOpen)}
+                    >
+                        {menuOpen ? <MenuIcon /> : <ListIcon />}
+                    </Button>
 
-            </Button>
-            <div className="container mx-auto flex justify-between px-4 py-3">
-                <div className="flex w-full items-center justify-between">
-                    <div className="no-copy">
-                        <a href="/" className="flex items-center justify-center gap-5">
-                            <img
-                                src={gerb}
-                                alt="Ko'prik qurulish"
-                                className=" size-10 object-cover mobil330:hidden sm:block" // 15x1 px
-                            />
-                            <img
-                                src={flag}
-                                alt="Ko'prik qurulish"
-                                className="h-14 mobil330:hidden sm:block" // 150x10
-                            />
-                            <img src={Logo} alt="Ko'prik qurulish" className="h-12"/>
-                        </a>
-                    </div>
-                    <div className="no-copy flex items-center gap-6 dark:text-white md:order-2">
-                        <LanguageSelector/>
-                        {/*<Notification />*/}
-                        <ThemeToggle/>
+                    {/* Logo Section */}
+                    <a href="/" className="flex items-center gap-3">
+                        <img
+                            src={gerb}
+                            alt="Gerb"
+                            className="hidden size-10 object-cover sm:block"
+                        />
+                        <img
+                            src={flag}
+                            alt="Flag"
+                            className="hidden h-12 sm:block"
+                        />
+                        <img
+                            src={isDark ? Logo : Logo2}
+                            alt="Logo"
+                            className="h-10"
+                        />
+                    </a>
+                </div>
 
-                    </div>
+                {/* Right-side buttons */}
+                <div className="flex items-center gap-4 text-white">
+                    <LanguageSelector />
+                    <ThemeToggle />
+                    <Profile/>
                 </div>
             </div>
         </header>

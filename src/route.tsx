@@ -1,31 +1,27 @@
 import { RouteObject, useRoutes } from "react-router-dom";
 import BaseLayout from "./layouts/base/BaseLayout.tsx";
-import Dashboard from "./pages/dashboard/Dashboard.tsx";
 import Login from "./layouts/auth/login/Login.tsx";
+import Nazorat from "./pages/dashboard/Nazorat.tsx";
 
-function Router () {
+function Rout() {
     const routes: RouteObject[] = [
         {
-            path: 'login',
-            element: <Login/>
+            path: "/login",
+            element: <Login />,
         },
         {
-            path: '/',
-            element: (
-                <BaseLayout/>
-            ),
+            path: "/",
+            element: <BaseLayout />,
             children: [
                 {
                     path: "dashboard",
-                    element: (
-                        <Dashboard/>
-                    ),
+                    element: <Nazorat />,
                 },
-            ]
+            ],
         },
-        {
-        }
-    ]
-    return useRoutes(routes)
+    ];
+
+    return useRoutes(routes);
 }
-export default Router;
+
+export default Rout;

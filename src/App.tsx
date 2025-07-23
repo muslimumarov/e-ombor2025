@@ -1,11 +1,11 @@
 
-import Router from "./route.tsx";
+import Rout from "./route.tsx";
 
 const App: React.FC = () => {
 
     return (
       <div className="">
-          <Router/>
+          <Rout/>
       </div>
     );
   }

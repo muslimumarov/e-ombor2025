@@ -10,7 +10,7 @@ const ThemeToggle = () => {
       {mode === ThemeMode.DARK ? (
         <SunIcon size={22} />
       ) : (
-        <MoonIcon color={"white"} size={22} />
+        <MoonIcon color={"Black"} size={22} />
       )}
     </span>
   );
