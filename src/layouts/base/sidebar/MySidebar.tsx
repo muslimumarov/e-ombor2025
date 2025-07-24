@@ -38,7 +38,7 @@ const MySidebar = () => {
                                     <Sidebar.Collapse label={item.label as string}>
                                         {item.children.map((child, childIndex) => (
                                             <Sidebar.Item key={childIndex} href={child.href}>
-                                                <div className="flex items-center gap-2 text-sm capitalize [&>svg]:size-4">
+                                                <div className="flex items-center gap-2 text-sm capitalize [&>svg]:size-7">
                                                     {menuOpen ? (
                                                         child.icon
                                                     ) : (
@@ -59,7 +59,7 @@ const MySidebar = () => {
                                         className="px-0"
                                     >
                                         <div className="flex items-center justify-between gap-2 text-gray-600 dark:text-white">
-                                            <div className="flex items-center gap-2 text-sm capitalize [&>svg]:size-4">
+                                            <div className="flex items-center gap-2 text-sm capitalize [&>svg]:size-7">
                                                 {menuOpen ? (
                                                     item.icon
                                                 ) : (

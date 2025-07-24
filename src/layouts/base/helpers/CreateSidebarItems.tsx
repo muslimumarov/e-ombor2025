@@ -3,24 +3,7 @@ import {HiChartPie} from "react-icons/hi";
 import {FaWarehouse} from "react-icons/fa6";
 import {ReactNode} from "react";
 
-import {
-    BookCopyIcon,
-    BookOpenText,
-    BotMessageSquareIcon,
-    ChartBarStackedIcon,
-    FileStackIcon,
-    Globe,
-    HandshakeIcon,
-    LayoutTemplateIcon,
-    MessageCircleQuestion,
-    MonitorIcon,
-    Newspaper,
-    SendToBackIcon,
-    ShieldCheckIcon,
-    ShieldEllipsis,
-    TicketsPlaneIcon,
-    UsersRound
-} from "lucide-react";
+import {ArrowLeft, ArrowRight, FileStackIcon, UsersRound} from "lucide-react";
 
 interface SidebarItems extends Omit<SidebarItemProps, "children" | "label" | "icon"> {
     children?: SidebarItems[];
@@ -32,7 +15,7 @@ interface SidebarItems extends Omit<SidebarItemProps, "children" | "label" | "ic
 
 const createSidebarItems = (t: (text: string) => string): SidebarItems[] => [
     {
-        label: t('monitoring'),
+        label: t('Nazorat'),
         icon: <HiChartPie/>,
         href: "/dashboard",
         // roles: [
@@ -43,53 +26,53 @@ const createSidebarItems = (t: (text: string) => string): SidebarItems[] => [
         // ],
     },
     {
-        label: t("departments"),
-        icon: < FaWarehouse/>,
+        label: t("Kirim"),
+        icon: < ArrowRight/>,
         href: "/department",
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
     },
     {
-        label: t("sections"),
-        icon: <LayoutTemplateIcon/>,
+        label: t("Chiqim"),
+        icon: <ArrowLeft/>,
         href: "/section",
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
     },
     {
-        label: t("positions"),
-        icon: <BookCopyIcon/>,
+        label: t("1-Koprikqurilish otryadi"),
+        icon: <FaWarehouse/>,
         href: "/position",
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
     },
     {
-        label: t("management"),
-        icon: <MonitorIcon/>,
+        label: t("2-Ko'prikqurilish otryadi"),
+        icon: <FaWarehouse/>,
         href: "/management",
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
     },
     {
-        label: t("news"),
-        icon: <Newspaper/>,
+        label: t("13-Ko'prikqurilish otryadi"),
+        icon: <FaWarehouse/>,
         href: "/news",
         badge: 3,
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
     },
     {
-        label: t("categories"),
-        icon: <ChartBarStackedIcon/>,
+        label: t("14-Ko'prikqurilish otryadi"),
+        icon: <FaWarehouse/>,
         href: "/category",
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
     },
     {
-        label: t("articles"),
-        icon: <BookOpenText/>,
+        label: t("67-Ko'prikqurilish otryadi"),
+        icon: <FaWarehouse/>,
         href: "/articles",
         labelType: "Pro",
         labelColor: "dark",
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
     },
     {
-        label: t("recommendations"),
-        icon: <MessageCircleQuestion/>,
+        label: t("Ko‘prikqurilishbutlash"),
+        icon: <FaWarehouse/>,
         href: "/recommendation",
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
     },
@@ -99,48 +82,6 @@ const createSidebarItems = (t: (text: string) => string): SidebarItems[] => [
         icon: <FileStackIcon/>,
         href: "/document",
         // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
-    },
-    {
-        label: t("vacancies"),
-        icon: <TicketsPlaneIcon/>,
-        href: "/vacancy",
-        // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
-    },
-    {
-        label: t("partners"),
-        icon: <HandshakeIcon/>,
-        href: "/partner",
-        // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT],
-    },
-    {
-        label: t("services"),
-        icon: <Globe/>,
-        href: "/services",
-        // roles: [UserRole.SUPER_ADMIN, UserRole.CONTENT, UserRole.ACCOUNTING],
-    },
-    {
-        label: t("orders"),
-        icon: <SendToBackIcon/>,
-        href: "/order",
-        // roles: [UserRole.SUPER_ADMIN, UserRole.ACCOUNTING],
-    },
-    {
-        label: t("incident"),
-        icon: <ShieldEllipsis/>,
-        href: "/events",
-        // roles: [UserRole.SUPER_ADMIN, UserRole.MONITORING],
-    },
-    {
-        label: t("chat"),
-        icon: <BotMessageSquareIcon/>,
-        href: "/chat",
-        // roles: [UserRole.SUPER_ADMIN, UserRole.MONITORING, UserRole.CONTENT],
-    },
-    {
-        label: t("certification"),
-        icon: <ShieldCheckIcon/>,
-        href: "/certification",
-        // roles: [UserRole.SUPER_ADMIN, UserRole.CERTIFICATION],
     },
     {
         label: t("systemUsers"),
