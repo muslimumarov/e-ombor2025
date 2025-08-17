@@ -15,9 +15,9 @@ interface SidebarItems extends Omit<SidebarItemProps, "children" | "label" | "ic
 
 const createSidebarItems = (t: (text: string) => string): SidebarItems[] => [
     {
-        label: t('Nazorat'),
+        label: t('Boshliq'),
         icon: <HiChartPie/>,
-        href: "/dashboard",
+        href: "/nazorat",
         // roles: [
         //     UserRole.Aparat,
         //     UserRole.CONTENT,

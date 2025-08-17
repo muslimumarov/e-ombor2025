@@ -4,3 +4,6 @@
 .no-copy {
     user-select: none;
 }
+body {
+    background-color: #ebf5ff;
+}

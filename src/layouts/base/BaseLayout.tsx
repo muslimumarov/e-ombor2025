@@ -1,18 +1,23 @@
-import Navbar from "./navbar/Navbar.tsx";
-import MySidebar from "./sidebar/MySidebar.tsx";
 import { Outlet } from "react-router-dom";
+import Navbar from "./navbar/Navbar";
+// import MySidebar from "./sidebar/MySidebar";
 
 const BaseLayout = () => {
     return (
         <>
-            <div className={"w-full shrink-0"}>
+            {/* Yuqoridagi Navbar */}
+            <div className="w-full shrink-0">
                 <Navbar />
             </div>
-            <div className={"flex h-[calc(100%-70px)] w-full shrink"}>
-                <MySidebar />
-                <div className={"size-full overflow-y-auto p-3"}>
-                    <div className={"mt-[70px] min-h-full rounded-lg bg-gray-50 p-3 dark:bg-dark-primary"}>
-                        <Outlet />
+
+            {/* Pastki qism */}
+            <div className="flex h-[calc(100%-70px)] w-full shrink">
+                {/* Agar kerak bo‘lsa, sidebar qo‘shish */}
+                {/* <MySidebar /> */}
+
+                <div className="size-full overflow-y-auto p-3">
+                    <div className="px-4dark:bg-[#1E293B] mx-auto mt-[70px] min-h-full max-w-[1200px] rounded-lg bg-white p-3 dark:bg-[#1E293B]">
+                        <Outlet /> {/* Router child pages shu yerda chiqadi */}
                     </div>
                 </div>
             </div>
