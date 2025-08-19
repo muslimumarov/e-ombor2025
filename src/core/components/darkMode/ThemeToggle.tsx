@@ -8,7 +8,7 @@ const ThemeToggle = () => {
   return (
     <span className={"cursor-pointer "} onClick={() => toggleMode()}>
       {mode === ThemeMode.DARK ? (
-        <SunIcon size={22} />
+        <SunIcon size={22} color={"White"} />
       ) : (
         <MoonIcon color={"Black"} size={22} />
       )}

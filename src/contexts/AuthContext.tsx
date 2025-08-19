@@ -1,10 +1,12 @@
 // src/contexts/AuthContext.tsx
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuthStore, MeResponse } from "../store/authStore";
+import FullScreenSpinner from "../components/loader/FullScreenSpinner.tsx";
 
 interface AuthContextType {
     isAuthed: boolean;
     user: MeResponse | null;
+    loading: boolean;
     login: (u: string, p: string) => Promise<MeResponse>;
     logout: () => Promise<void>;
 }
@@ -18,13 +20,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const logout = useAuthStore((s) => s.logout);
     const bootstrap = useAuthStore((s) => s.bootstrap);
 
-    // App ishga tushganda: refresh cookie orqali avtomatik kirish
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
-        bootstrap();
+        (async () => {
+            try {
+                await bootstrap(); // tokenni refresh qilish va userni olish
+            } catch (e) {
+                console.error("Bootstrap xatosi:", e);
+                // refresh token ishlamasa AuthStore-ni tozalaymiz
+                useAuthStore.getState().setAccess(null);
+                useAuthStore.getState().setUser(null);
+            } finally {
+                setLoading(false); // ✅ har doim loading false
+            }
+        })();
     }, [bootstrap]);
 
+    if (loading) return <FullScreenSpinner />;
+
     return (
-        <AuthContext.Provider value={{ isAuthed, user, login, logout }}>
+        <AuthContext.Provider value={{ isAuthed, user, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

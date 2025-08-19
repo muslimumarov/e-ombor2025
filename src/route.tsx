@@ -6,29 +6,25 @@ import Bugalter from "./pages/bugalteriya/Bugalteriya";
 import Xarid from "./pages/xarid/Xarid";
 import Ishboshqaruvchi from "./pages/ishboshqaruvchi/Ishboshqaruvchi";
 import Login from "./layouts/auth/login/Login";
-import ProtectedRoute from "./Services/ProtectedRoute.tsx";
 import Omborchi from "./pages/Omborchi/Omborchi";
+import ProtectedRoute from "./Services/ProtectedRoute.tsx";
 
 function Rout() {
     const routes: RouteObject[] = [
         { path: "/login", element: <Login /> },
         {
             path: "/",
-            element: <ProtectedRoute />, // umumiy guard (faqat authed)
+            element: <ProtectedRoute />,
             children: [
                 {
                     path: "",
                     element: <BaseLayout />,
                     children: [
                         { path: "dashboard", element: <Boshliq /> },
-                        { path: "bugalter", element: <ProtectedRoute role="bugalter" /> },
-                        { path: "bugalter", element: <Bugalter /> },
-                        { path: "omborchi", element: <ProtectedRoute role="omborchi" /> },
-                        { path: "omborchi", element: <Omborchi /> },
-                        { path: "xarid", element: <ProtectedRoute role="xarid" /> },
-                        { path: "xarid", element: <Xarid /> },
-                        { path: "ishboshqaruvchi", element: <ProtectedRoute role="ishboshqaruvchi" /> },
-                        { path: "ishboshqaruvchi", element: <Ishboshqaruvchi /> },
+                        { path: "bugalter", element: <ProtectedRoute role="bugalter"><Bugalter /></ProtectedRoute> },
+                        { path: "omborchi", element: <ProtectedRoute role="omborchi"><Omborchi /></ProtectedRoute> },
+                        { path: "xarid", element: <ProtectedRoute role="xarid"><Xarid /></ProtectedRoute> },
+                        { path: "ishboshqaruvchi", element: <ProtectedRoute role="ishboshqaruvchi"><Ishboshqaruvchi /></ProtectedRoute> },
                     ],
                 },
                 { path: "*", element: <Login /> },

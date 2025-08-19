@@ -1,12 +1,14 @@
 // src/lib/api.ts
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
-import {MeResponse, useAuthStore, UserRole} from "../store/authStore";
+import Cookies from "js-cookie";
+import { useAuthStore, UserRole } from "../store/authStore";
 
 const api: AxiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE,
-    withCredentials: false,
+    withCredentials: true,
 });
 
+// Queue va refresh holati
 let isRefreshing = false;
 let queue: Array<(token: string | null) => void> = [];
 
@@ -17,7 +19,7 @@ const flushQueue = (token: string | null) => {
 
 // Request interceptor
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("access_token");
+    const token = Cookies.get("access_token");
     if (token) {
         config.headers = config.headers ?? {};
         (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
@@ -29,38 +31,44 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (res) => res,
     async (error: AxiosError) => {
-        const status = error.response?.status;
-        const original = error.config as (AxiosRequestConfig & { _retry?: boolean }) | undefined;
+        const original = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-        if (status === 401 && original && !original._retry) {
+        if (error.response?.status === 401 && !original._retry) {
             original._retry = true;
 
-            if (isRefreshing) {
-                const newToken = await new Promise<string | null>((resolve) => queue.push(resolve));
-                if (newToken) {
-                    original.headers = original.headers ?? {};
-                    (original.headers as Record<string, string>).Authorization = `Bearer ${newToken}`;
+            const refresh = Cookies.get("refresh_token");
+            if (refresh) {
+                if (isRefreshing) {
+                    // Agar boshqa request tokenni yangilamoqda bo'lsa, queuega qo'shish
+                    const newToken = await new Promise<string | null>((resolve) => queue.push(resolve));
+                    if (newToken) {
+                        original.headers = original.headers ?? {};
+                        (original.headers as Record<string, string>).Authorization = `Bearer ${newToken}`;
+                    }
+                    return api(original);
                 }
-                return api(original);
-            }
 
-            isRefreshing = true;
-            try {
-                const newAccess = await refreshAccessToken();
-                useAuthStore.getState().setAccess(newAccess);
-                flushQueue(newAccess);
+                isRefreshing = true;
+                try {
+                    const newAccess = await refreshAccessToken();
+                    if (!newAccess) throw new Error("Refresh token eskirgan");
 
-                if (newAccess) {
+                    useAuthStore.getState().setAccess(newAccess);
+                    flushQueue(newAccess);
+
                     original.headers = original.headers ?? {};
                     (original.headers as Record<string, string>).Authorization = `Bearer ${newAccess}`;
+
+                    return api(original); // 🔄 requestni qayta yuboradi, foydalanuvchi sahifada qoladi
+                } catch {
+                    flushQueue(null);
+                    await safeRedirectToLogin(); // agar refresh token ishlamasa loginga yo'naltirish
+                    return Promise.reject(error);
+                } finally {
+                    isRefreshing = false;
                 }
-                return api(original);
-            } catch (e) {
-                flushQueue(null);
-                await safeRedirectToLogin();
-                return Promise.reject(e);
-            } finally {
-                isRefreshing = false;
+            } else {
+                await safeRedirectToLogin(); // refresh token yo'q bo'lsa loginga yo'naltirish
             }
         }
 
@@ -69,68 +77,73 @@ api.interceptors.response.use(
 );
 
 // Auth API
-export interface LoginResponse { access: string; refresh: string; }
+export interface LoginResponse {
+    access: string;
+    refresh?: string;
+}
 
 export async function loginRequest(username: string, password: string): Promise<LoginResponse> {
     const { data } = await api.post<LoginResponse>("/token/", { username, password });
-    localStorage.setItem("access_token", data.access);
-    localStorage.setItem("refresh_token", data.refresh);
+    if (data.access) {
+        Cookies.set("access_token", data.access, { expires: 1, secure: false, sameSite: "Lax" });
+    }
+    if (data.refresh) {
+        Cookies.set("refresh_token", data.refresh, { expires: 7, secure: false, sameSite: "Lax" });
+    }
     return data;
 }
 
 export async function refreshAccessToken(): Promise<string | null> {
     try {
-        const refresh = localStorage.getItem("refresh_token");
+        const refresh = Cookies.get("refresh_token");
         if (!refresh) return null;
 
         const { data } = await api.post<{ access: string }>("/token/refresh/", { refresh });
         if (data.access) {
-            localStorage.setItem("access_token", data.access);
-            return data.access;
+            Cookies.set("access_token", data.access, { expires: 1, secure: true, sameSite: "Strict" });
         }
-        return null;
+        return data.access ?? null;
     } catch {
         return null;
     }
 }
 
 export async function logoutRequest(): Promise<void> {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+    try {
+        // serverga POST yuborish shart emas
+    } finally {
+        Cookies.remove("access_token");
+        Cookies.remove("refresh_token");
+        useAuthStore.getState().setAccess(null);
+        useAuthStore.getState().setUser(null);
+    }
 }
 
-async function safeRedirectToLogin() {
+// Login sahifasiga yo'naltirish
+export async function safeRedirectToLogin() {
     const { logout } = useAuthStore.getState();
-    try { await logout(); } catch {}
+    try {
+        await logout();
+    } catch (e) {
+        console.error("Logout xatosi:", e);
+    }
     window.location.replace("/login");
 }
 
 // Profile API
 export interface ProfileResponse {
+    id: number;
+    username: string;
+    role: UserRole;
     first_name: string;
     last_name: string;
     email: string;
     phone_number: string;
-    role: string | null;
     image_url: string | null;
 }
-
 export async function getProfile(): Promise<ProfileResponse> {
-    const res = await api.get("/profile/");
-    console.log("📡 getProfile raw response:", res);
-    console.log("📄 getProfile raw data:", res.data);
-    return res.data;
+    const { data } = await api.get<ProfileResponse>("/profile/");
+    return data;
 }
-
-// api.ts ichida
-export async function getMe(): Promise<MeResponse> {
-    const { data } = await api.get<{ id: number; username: string; role: string }>("/me/");
-    return {
-        id: data.id,
-        username: data.username,
-        role: data.role as UserRole, // <--- shu yerda cast qilyapmiz
-    };
-}
-
 
 export default api;
