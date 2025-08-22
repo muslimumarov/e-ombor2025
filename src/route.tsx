@@ -5,31 +5,58 @@ import Boshliq from "./pages/nazorat/Boshliq";
 import Bugalter from "./pages/bugalteriya/Bugalteriya";
 import Xarid from "./pages/xarid/Xarid";
 import Ishboshqaruvchi from "./pages/ishboshqaruvchi/Ishboshqaruvchi";
-import Login from "./layouts/auth/login/Login";
+import Login from "./layouts/login/Login";
 import Omborchi from "./pages/Omborchi/Omborchi";
 import ProtectedRoute from "./Services/ProtectedRoute.tsx";
+import NotFound from "./NotFound.tsx";
 
 function Rout() {
     const routes: RouteObject[] = [
         { path: "/login", element: <Login /> },
         {
             path: "/",
-            element: <ProtectedRoute />,
+            element: (
+                <ProtectedRoute>
+                    <BaseLayout />
+                </ProtectedRoute>
+            ),
             children: [
+                { path: "dashboard", element: <Boshliq /> },
                 {
-                    path: "",
-                    element: <BaseLayout />,
-                    children: [
-                        { path: "dashboard", element: <Boshliq /> },
-                        { path: "bugalter", element: <ProtectedRoute role="bugalter"><Bugalter /></ProtectedRoute> },
-                        { path: "omborchi", element: <ProtectedRoute role="omborchi"><Omborchi /></ProtectedRoute> },
-                        { path: "xarid", element: <ProtectedRoute role="xarid"><Xarid /></ProtectedRoute> },
-                        { path: "ishboshqaruvchi", element: <ProtectedRoute role="ishboshqaruvchi"><Ishboshqaruvchi /></ProtectedRoute> },
-                    ],
+                    path: "bugalter",
+                    element: (
+                        <ProtectedRoute roles={["bugalter"]}>
+                            <Bugalter />
+                        </ProtectedRoute>
+                    ),
                 },
-                { path: "*", element: <Login /> },
+                {
+                    path: "omborchi",
+                    element: (
+                        <ProtectedRoute roles={["omborchi"]}>
+                            <Omborchi />
+                        </ProtectedRoute>
+                    ),
+                },
+                {
+                    path: "xarid",
+                    element: (
+                        <ProtectedRoute roles={["xarid"]}>
+                            <Xarid />
+                        </ProtectedRoute>
+                    ),
+                },
+                {
+                    path: "ishboshqaruvchi",
+                    element: (
+                        <ProtectedRoute roles={["ishboshqaruvchi"]}>
+                            <Ishboshqaruvchi />
+                        </ProtectedRoute>
+                    ),
+                },
             ],
         },
+        { path: "*", element: <NotFound /> },
     ];
 
     return useRoutes(routes);

@@ -1,17 +1,9 @@
-// src/contexts/AuthContext.tsx
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { useAuthStore, MeResponse } from "../store/authStore";
-import FullScreenSpinner from "../components/loader/FullScreenSpinner.tsx";
+import React, { createContext, useEffect, useState } from "react";
+import { useAuthStore } from "../store/authStore";
+import FullScreenSpinner from "../components/loader/FullScreenSpinner";
+import { AuthContextType } from "./authInterfaces";
 
-interface AuthContextType {
-    isAuthed: boolean;
-    user: MeResponse | null;
-    loading: boolean;
-    login: (u: string, p: string) => Promise<MeResponse>;
-    logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const isAuthed = useAuthStore((s) => s.isAuthed);
@@ -20,22 +12,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const logout = useAuthStore((s) => s.logout);
     const bootstrap = useAuthStore((s) => s.bootstrap);
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    const initAuth = async () => {
+        console.log("[AuthProvider] initAuth start");
+        try {
+            await bootstrap();
+            console.log("[AuthProvider] bootstrap success ✅");
+        } catch (e) {
+            console.error("[AuthProvider] bootstrap xatosi:", e);
+            await logout();
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        (async () => {
-            try {
-                await bootstrap(); // tokenni refresh qilish va userni olish
-            } catch (e) {
-                console.error("Bootstrap xatosi:", e);
-                // refresh token ishlamasa AuthStore-ni tozalaymiz
-                useAuthStore.getState().setAccess(null);
-                useAuthStore.getState().setUser(null);
-            } finally {
-                setLoading(false); // ✅ har doim loading false
-            }
-        })();
-    }, [bootstrap]);
+        initAuth();
+    }, [bootstrap, logout]);
 
     if (loading) return <FullScreenSpinner />;
 
@@ -45,9 +39,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         </AuthContext.Provider>
     );
 };
-
-export function useAuth() {
-    const ctx = useContext(AuthContext);
-    if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-    return ctx;
-}

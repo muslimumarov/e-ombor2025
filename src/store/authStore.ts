@@ -1,96 +1,122 @@
-// src/store/authStore.ts
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import {create} from "zustand";
+import {devtools} from "zustand/middleware";
 import Cookies from "js-cookie";
-import { refreshAccessToken, loginRequest, logoutRequest, getProfile } from "../lib/api";
+import {AuthState} from "./storeInterfaces.ts";
+import {LoginResponse} from "../utils/interfaces/interfaces.ts";
+import {getProfile, loginRequest, logoutRequest, refreshAccessToken} from "../lib/request.ts";
 
-export type UserRole = "omborchi" | "bugalter" | "boshliq" | "xarid" | "ishboshqaruvchi";
-
-export interface MeResponse {
-    id: number;
-    username: string;
-    role: UserRole;
-}
-
-interface AuthState {
-    isAuthed: boolean;
-    accessToken: string | null;
-    user: MeResponse | null;
-
-    setAccess: (t: string | null) => void;
-    setUser: (u: MeResponse | null) => void;
-
-    bootstrap: () => Promise<void>;
-    login: (u: string, p: string) => Promise<MeResponse>;
-    logout: () => Promise<void>;
-}
-
-const ACCESS_KEY = "access_token";
-const REFRESH_KEY = "refresh_token";
 
 export const useAuthStore = create<AuthState>()(
-    devtools((set) => ({
-        isAuthed: false,
-        accessToken: null,
+    devtools((set, get) => ({
         user: null,
+        accessToken: Cookies.get("access_token") || null,
+        isAuthed: !!Cookies.get("access_token"),
+        loading: false,
 
-        setAccess: (t) => {
-            set({ accessToken: t, isAuthed: !!t });
-            if (t) {
-                Cookies.set(ACCESS_KEY, t, { expires: 1, secure: true, sameSite: "Strict" });
-            } else {
-                Cookies.remove(ACCESS_KEY);
-            }
-        },
+        setAccess: (token) =>
+            set((state) => {
+                if (state.accessToken === token) return state; // ⚡️ o‘zgarmasa render qilma
+                return {accessToken: token, isAuthed: !!token};
+            }),
 
-        setUser: (u) => set({ user: u }),
+        setUser: (user) =>
+            set((state) => {
+                if (JSON.stringify(state.user) === JSON.stringify(user)) return state; // ⚡️ faqat yangilansa yoz
+                return {user};
+            }),
 
-        bootstrap: async () => {
+        login: async (username, password) => {
+            set({loading: true});
             try {
-                const cookieAccess = Cookies.get(ACCESS_KEY);
-                const cookieRefresh = Cookies.get(REFRESH_KEY);
+                const data: LoginResponse = await loginRequest(username, password);
+                if (!data.access) throw new Error("Access token yo‘q");
 
-                let token = cookieAccess ?? null;
-                if (!token && cookieRefresh) {
-                    token = await refreshAccessToken();
-                }
+                set((state) =>
+                    state.accessToken === data.access
+                        ? state
+                        : {accessToken: data.access, isAuthed: true}
+                );
 
-                if (token) {
-                    set({ accessToken: token, isAuthed: true });
-                    Cookies.set(ACCESS_KEY, token, { expires: 1, secure: true, sameSite: "Strict" });
-                    const me = await getProfile();
-                    set({ user: me });
-                } else {
-                    set({ accessToken: null, isAuthed: false, user: null });
-                    Cookies.remove(ACCESS_KEY);
-                    Cookies.remove(REFRESH_KEY);
-                }
-            } catch {
-                set({ accessToken: null, isAuthed: false, user: null });
-                Cookies.remove(ACCESS_KEY);
-                Cookies.remove(REFRESH_KEY);
+                const profile = await getProfile();
+                set((state) =>
+                    JSON.stringify(state.user) === JSON.stringify(profile)
+                        ? state
+                        : {user: profile}
+                );
+                return profile;
+            } finally {
+                set({loading: false});
             }
-        },
-
-        login: async (username: string, password: string) => {
-            const { access, refresh } = await loginRequest(username, password);
-            set({ accessToken: access, isAuthed: true });
-            Cookies.set(ACCESS_KEY, access, { expires: 1, secure: true, sameSite: "Strict" });
-            if (refresh) {
-                Cookies.set(REFRESH_KEY, refresh, { expires: 7, secure: true, sameSite: "Strict" });
-            }
-            const me = await getProfile();
-            set({ user: me });
-            return me;
         },
 
         logout: async () => {
+            set({loading: true});
             try {
                 await logoutRequest();
             } finally {
-                set({ accessToken: null, isAuthed: false, user: null });
-                Cookies.remove(ACCESS_KEY);
-                Cookies.remove(REFRESH_KEY);
+                Cookies.remove("access_token");
+                Cookies.remove("refresh_token");
+                set((state) =>
+                    !state.user && !state.accessToken && !state.isAuthed
+                        ? state
+                        : {user: null, accessToken: null, isAuthed: false, loading: false}
+                );
+            }
+        },
+
+        loadProfile: async () => {
+            try {
+                const profile = await getProfile();
+                set((state) =>
+                    JSON.stringify(state.user) === JSON.stringify(profile)
+                        ? state
+                        : {user: profile}
+                );
+            } catch {
+                set((state) => (state.user === null ? state : {user: null}));
+            }
+        },
+        refresh: async () => {
+            try {
+                const newToken = await refreshAccessToken();
+
+                if (newToken) {
+                    Cookies.set("access_token", newToken, {
+                        expires: 1,
+                        secure: true,
+                        sameSite: "Lax",
+                    });
+
+                    set((state) =>
+                        state.accessToken === newToken
+                            ? state
+                            : { accessToken: newToken, isAuthed: true }
+                    );
+                } else {
+                    throw new Error("Refresh token invalid");
+                }
+            } catch (err) {
+                // ❌ Refresh ham ishlamadi → logout qilamiz
+                Cookies.remove("access_token");
+                Cookies.remove("refresh_token");
+                set(() => ({
+                    isAuthed: false,
+                    accessToken: null,
+                    user: null,
+                }));
+                throw err; // muhim: bootstrap bilishi uchun tashlaymiz
+            }
+        },
+
+
+        bootstrap: async () => {
+            const token = Cookies.get("access_token");
+            if (!token) {
+                await get().refresh();
+            }
+
+            if (get().isAuthed) {
+                await get().loadProfile();
             }
         },
     }))

@@ -1,4 +1,5 @@
 import React from "react";
+import { useAuthStore } from "../../../store/authStore";
 import LogoGold from "/images/Logo-Gold.png";
 import LogoBlue from "/images/Logo-Blue-Main.png";
 import Gerb from "/images/home-gerb.0379468a.svg";
@@ -12,12 +13,26 @@ const Navbar: React.FC = () => {
     const { mode } = useThemeMode();
     const isDark = mode === "dark";
 
+    const user = useAuthStore((state) => state.user);
+
+    // role → route mapping
+    const roleRoutes: Record<string, string> = {
+        omborchi: "/omborchi",
+        bugalter: "/bugalter",
+        boshliq: "/boshliq",
+        xarid: "/xarid",
+        ishboshqaruvchi: "/ishboshqaruvchi",
+    };
+
+    // default home → agar login bo‘lmagan yoki role topilmagan bo‘lsa
+    const homeLink = user?.role ? roleRoutes[user.role] ?? "/" : "/";
+
     return (
         <header className="fixed left-0 top-0 z-[9999] w-full bg-[#F5F7FA] shadow-md backdrop-blur dark:bg-[#1E293B] ">
             <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3">
                 {/* Chap tomonda: Logo */}
                 <div className="flex items-center gap-3">
-                    <a href="/" className="flex items-center gap-3">
+                    <a href={homeLink} className="flex items-center gap-3">
                         <img
                             src={Gerb}
                             alt="Gerb"
@@ -40,7 +55,7 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center gap-4">
                     <LanguageSelector />
                     <ThemeToggle />
-                    <Profile /> {/* rolega qarab avatar */}
+                    <Profile />
                 </div>
             </div>
         </header>

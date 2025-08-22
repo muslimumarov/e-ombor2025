@@ -1,27 +1,27 @@
-import React, { ReactNode } from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { UserRole } from "../store/authStore";
+// ProtectedRoute.tsx
+import { Navigate } from "react-router-dom";
+import {UserRole} from "../utils/interfaces/interfaces.ts";
+import {useAuth} from "../contexts/authComponent.ts";
 import FullScreenSpinner from "../components/loader/FullScreenSpinner.tsx";
-import {routeByRole} from "../utils/routeByRole.ts";
 
 interface ProtectedRouteProps {
-    role?: UserRole;
-    children?: ReactNode;
+    children: React.ReactNode;
+    roles?: UserRole[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ role, children }) => {
-    const { isAuthed, user, loading } = useAuth();
+export default function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
+    const { user, loading } = useAuth();
+    console.log("Protected user:", user)
+    if (loading) return <FullScreenSpinner/>
 
-    if (loading) return <FullScreenSpinner />;
-    if (!isAuthed) return <Navigate to="/login" replace />;
-
-    if (role && user?.role !== role) {
-        console.log("Redirecting user with role:", user?.role);
-        return <Navigate to={routeByRole(user!.role)} replace />;
+    // user yo‘q bo‘lsa -> login sahifasiga otkazamiz
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+    if (roles && user.role && !roles.includes(user.role)) {
+        return <div>No access</div>; // yoki <Navigate to="/403" />
     }
 
-    return <>{children || <Outlet />}</>;
-};
 
-export default ProtectedRoute;
+    return <>{children}</>;
+}

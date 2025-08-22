@@ -1,5 +1,4 @@
-// src/utils/routeByRole.ts
-import { UserRole } from "../store/authStore";
+import {UserRole} from "../interfaces/interfaces.ts";
 
 export function routeByRole(role: UserRole): string {
     switch (role) {
