@@ -8,7 +8,7 @@ const NotFound = () => {
             <p className="mt-4 text-2xl">Oops! Page not found.</p>
             <p className="mt-2 text-lg">Siz qidirgan sahifa mavjud emas.</p>
             <Link
-                to="/"
+                to="/login"
                 className="mt-6 rounded-lg bg-white px-6 py-3 font-semibold text-purple-800 transition hover:bg-purple-100"
             >
                 Bosh sahifaga qaytish

@@ -27,23 +27,21 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// 🔴 Response interceptor → 401z
 api.interceptors.response.use(
     (res) => res,
     async (error: AxiosError) => {
         const original = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-        // 🚫 Login sahifada bo‘lsak yoki bu allaqachon retry bo‘lsa → qaytmaymiz
         if (window.location.pathname === "/login" || original._retry) {
             return Promise.reject(error);
         }
 
         if (error.response?.status === 401) {
             original._retry = true;
-            console.warn("[401] Access token eskirgan, refresh qilinmoqda...");
+            // console.warn("[401] Access token eskirgan, refresh qilinmoqda...");
 
             const refresh = Cookies.get("refresh_token");
-            console.log(refresh );
+            console.log("bu refresh: ", refresh);
             if (!refresh) {
                 // ❌ Refresh token yo‘q → tozalash
                 safeRedirectToLogin()

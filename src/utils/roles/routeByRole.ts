@@ -7,12 +7,12 @@ export function routeByRole(role: UserRole): string {
         case "bugalter":
             return "/bugalter";
         case "boshliq":
-            return "/dashboard";
+            return "/boshliq";
         case "xarid":
             return "/xarid";
         case "ishboshqaruvchi":
             return "/ishboshqaruvchi";
         default:
-            return "/dashboard";
+            return "/login";
     }
 }

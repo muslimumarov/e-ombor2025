@@ -15,12 +15,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     const initAuth = async () => {
-        console.log("[AuthProvider] initAuth start");
         try {
             await bootstrap();
-            console.log("[AuthProvider] bootstrap success ✅");
         } catch (e) {
-            console.error("[AuthProvider] bootstrap xatosi:", e);
             await logout();
         } finally {
             setLoading(false);

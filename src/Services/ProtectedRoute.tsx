@@ -11,15 +11,13 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
     const { user, loading } = useAuth();
-    console.log("Protected user:", user)
     if (loading) return <FullScreenSpinner/>
-
     // user yo‘q bo‘lsa -> login sahifasiga otkazamiz
     if (!user) {
         return <Navigate to="/login" replace />;
     }
     if (roles && user.role && !roles.includes(user.role)) {
-        return <div>No access</div>; // yoki <Navigate to="/403" />
+        return <div>Role Mavjud emas</div>; // yoki <Navigate to="/403" />
     }
 
 

@@ -11,11 +11,9 @@
         const [username, setUsername] = useState("");
         const [password, setPassword] = useState("");
         const [showPassword, setShowPassword] = useState(false);
-        const [loading, setLoading] = useState(false);
 
         const submit = async (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
-            setLoading(true);
             try {
                 const me = await login(username, password); // 🚀 endi MeResponse qaytaradi
                 toast.success("Kirish muvaffaqiyatli ✅");
@@ -26,8 +24,6 @@
                 } else {
                     toast.error("Login yoki parol xato");
                 }
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -85,13 +81,11 @@
                             </div>
 
                             <button
-                                disabled={loading}
                                 type="submit"
                                 className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 py-3 font-medium text-white opacity-80 shadow-lg transition-all hover:brightness-110"
                             >
                                 <span className="flex items-center justify-center">
-                                    <LogIn size={18} className="mr-2"/>
-                                    {loading ? "Yuklanmoqda..." : "Kirish"}
+                                    <LogIn size={18} className="mr-2"/> Kirish
                                 </span>
                             </button>
                         </form>

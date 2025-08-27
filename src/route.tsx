@@ -1,5 +1,5 @@
 // src/route.tsx
-import { RouteObject, useRoutes } from "react-router-dom";
+import {Navigate, RouteObject, useRoutes} from "react-router-dom";
 import BaseLayout from "./layouts/base/BaseLayout";
 import Boshliq from "./pages/nazorat/Boshliq";
 import Bugalter from "./pages/bugalteriya/Bugalteriya";
@@ -21,7 +21,7 @@ function Rout() {
                 </ProtectedRoute>
             ),
             children: [
-                { path: "dashboard", element: <Boshliq /> },
+                { path: "boshliq", element: <Boshliq /> },
                 {
                     path: "bugalter",
                     element: (
@@ -56,8 +56,10 @@ function Rout() {
                 },
             ],
         },
-        { path: "*", element: <NotFound /> },
+        { path: "*", element: <Navigate to="/not-found" replace /> },
+        { path: "/not-found", element: <NotFound /> },
     ];
+
 
     return useRoutes(routes);
 }
